@@ -1,55 +1,57 @@
-pipeline{
-    
+pipeline {
     agent any 
     tools {
         maven "Maven 3.9.9"
     }
 
-    stages{
-        stage("Test")
-        {
-            steps{
+    stages {
+        stage("Checkout") {
+            steps {
+                // Replace with your actual repo URL and branch
+                git url: 'https://github.com/MiniKhan/jenkins-github-trigger.git', branch: 'main'
+            }
+        }
+
+        stage("Test") {
+            steps {
                 sh "mvn test"
-                echo "========executing A========"
-                sh 'mvn --version'
             }
-           
         }
-         stage("Build")
-        {
-            steps{
+
+        stage("Build") {
+            steps {
                 sh "mvn package"
-                echo "========executing A========"
             }
-           
         }
-         stage("Deploy on Test")
-        {
-            steps{
-                echo "========executing A========"
-                //deploy on testing container
-                deploy adapters: [tomcat9(credentialsId: 'Tomcat9Details', path: '', url: 'http://192.168.56.4:8081/')], contextPath: '/app', war: '**/*.war'
+
+        stage("Deploy on Test") {
+            steps {
+                echo "======== Deployed to Testing Server ========"
+                deploy adapters: [tomcat9(
+                    credentialsId: 'Tomcat9Details', 
+                    path: '', 
+                    url: 'http://192.168.56.4:8081/')], 
+                    contextPath: '/app', 
+                    war: '**/*.war'
             }
-           
         }
-         stage("Deploy on Prod")
-        {
-            steps{
-                //deploy on production container
-                echo "========Successfully deployed to Production Server========"
+
+        stage("Deploy on Prod") {
+            steps {
+                echo "======== Successfully deployed to Production Server ========"
             }
-           
         }
     }
-    post{
-        always{
-            echo "========always========"
+
+    post {
+        always {
+            echo "======== always ========"
         }
-        success{
-            echo "========pipeline executed successfully ========"
+        success {
+            echo "======== Pipeline executed successfully ========"
         }
-        failure{
-            echo "========pipeline execution failed========"
+        failure {
+            echo "======== Pipeline execution failed ========"
         }
     }
 }
